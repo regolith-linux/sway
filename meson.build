@@ -45,6 +45,27 @@ subproject(
 	version: wlroots_version,
 )
 wlroots = dependency('wlroots', version: wlroots_version)
+xkbcommon = dependency('xkbcommon')
+cairo = dependency('cairo')
+pango = dependency('pango')
+pangocairo = dependency('pangocairo')
+gdk_pixbuf = dependency('gdk-pixbuf-2.0', required: get_option('gdk-pixbuf'))
+pixman = dependency('pixman-1')
+glesv2 = dependency('glesv2')
+libevdev = dependency('libevdev')
+libinput = dependency('libinput', version: '>=1.6.0')
+xcb = dependency('xcb', required: get_option('xwayland'))
+drm_full = dependency('libdrm') # only needed for drm_fourcc.h
+drm = drm_full.partial_dependency(compile_args: true, includes: true)
+libudev = dependency('libudev')
+bash_comp = dependency('bash-completion', required: false)
+fish_comp = dependency('fish', required: false)
+math = cc.find_library('m')
+rt = cc.find_library('rt')
+xcb_icccm = dependency('xcb-icccm', required: get_option('xwayland'))
+threads = dependency('threads') # for pthread_setschedparam
+resdb = dependency('resdb-0')
+
 wlroots_features = {
 	'xwayland': false,
 	'libinput_backend': false,

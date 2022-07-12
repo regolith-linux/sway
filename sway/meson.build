@@ -102,6 +102,7 @@ sway_sources = files(
 	'commands/seat/shortcuts_inhibitor.c',
 	'commands/seat/xcursor_theme.c',
 	'commands/set.c',
+	'commands/set_from_resource.c',
 	'commands/show_marks.c',
 	'commands/shortcuts_inhibitor.c',
 	'commands/smart_borders.c',
@@ -230,6 +231,7 @@ sway_deps = [
 	xkbcommon,
 	xcb,
 	xcb_icccm,
+	resdb,
 ]
 
 if have_xwayland
