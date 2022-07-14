@@ -71,7 +71,7 @@ math = cc.find_library('m')
 rt = cc.find_library('rt')
 xcb_icccm = dependency('xcb-icccm', required: get_option('xwayland'))
 threads = dependency('threads') # for pthread_setschedparam
-resdb = dependency('resdb-0')
+trawldb = dependency('trawldb-0')
 
 wlroots_features = {
 	'xwayland': false,
