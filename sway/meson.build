@@ -231,7 +231,7 @@ sway_deps = [
 	xkbcommon,
 	xcb,
 	xcb_icccm,
-	resdb,
+	trawldb,
 ]
 
 if have_xwayland

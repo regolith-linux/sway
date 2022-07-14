@@ -3,7 +3,7 @@
 #include "stringop.h"
 #include "sway/commands.h"
 #include "sway/config.h"
-#include <resdb/client_api.h>
+#include <trawldb/client_api.h>
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
