@@ -236,7 +236,7 @@ if have_xwayland
 endif
 
 executable(
-	'sway',
+	'sway-regolith',
 	sway_sources,
 	include_directories: [sway_inc],
 	dependencies: sway_deps,

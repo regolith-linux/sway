@@ -1,5 +1,5 @@
 project(
-	'sway',
+	'sway-regolith',
 	'c',
 	version: '1.8-dev',
 	license: 'MIT',
@@ -243,7 +243,7 @@ configure_file(
 )
 
 install_data(
-	'sway.desktop',
+	'sway-regolith.desktop',
 	install_dir: join_paths(datadir, 'wayland-sessions')
 )
 
