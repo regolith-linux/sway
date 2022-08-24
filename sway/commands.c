@@ -83,6 +83,7 @@ static const struct cmd_handler handlers[] = {
 	{ "popup_during_fullscreen", cmd_popup_during_fullscreen },
 	{ "seat", cmd_seat },
 	{ "set", cmd_set },
+	{ "set_from_resource", cmd_set_from_resource},
 	{ "show_marks", cmd_show_marks },
 	{ "smart_borders", cmd_smart_borders },
 	{ "smart_gaps", cmd_smart_gaps },
@@ -276,8 +277,8 @@ list_t *execute_command(char *_exec, struct sway_seat *seat,
 			goto cleanup;
 		}
 
-		// Var replacement, for all but first argument of set
-		for (int i = handler->handle == cmd_set ? 2 : 1; i < argc; ++i) {
+		// Var replacement, for all but first argument of set and xresource
+		for (int i = handler->handle == cmd_set || handler->handle == cmd_set_from_resource ? 2 : 1; i < argc; ++i) {
 			argv[i] = do_var_replacement(argv[i]);
 		}
 
@@ -386,7 +387,7 @@ struct cmd_results *config_command(char *exec, char **new_block) {
 	}
 
 	// Do variable replacement
-	if (handler->handle == cmd_set && argc > 1 && *argv[1] == '$') {
+	if ((handler->handle == cmd_set || handler->handle == cmd_set_from_resource )&& argc > 1 && *argv[1] == '$') {
 		// Escape the variable name so it does not get replaced by one shorter
 		char *temp = calloc(1, strlen(argv[1]) + 2);
 		temp[0] = '$';
@@ -401,13 +402,14 @@ struct cmd_results *config_command(char *exec, char **new_block) {
 	free(command);
 
 	// Strip quotes and unescape the string
-	for (int i = handler->handle == cmd_set ? 2 : 1; i < argc; ++i) {
+	for (int i = handler->handle == cmd_set || handler->handle == cmd_set_from_resource ? 2 : 1; i < argc; ++i) {
 		if (handler->handle != cmd_exec && handler->handle != cmd_exec_always
 				&& handler->handle != cmd_mode
 				&& handler->handle != cmd_bindsym
 				&& handler->handle != cmd_bindcode
 				&& handler->handle != cmd_bindswitch
 				&& handler->handle != cmd_set
+				&& handler->handle != cmd_set_from_resource
 				&& handler->handle != cmd_for_window
 				&& (*argv[i] == '\"' || *argv[i] == '\'')) {
 			strip_quotes(argv[i]);

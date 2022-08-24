@@ -11,3 +11,5 @@ config-debug
 wayland-*-protocol.*
 /subprojects/wlroots
 subprojects
+*.orig
+*.rej

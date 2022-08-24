@@ -1,5 +1,5 @@
 project(
-	'sway',
+	'sway-regolith',
 	'c',
 	version: '1.7',
 	license: 'MIT',
@@ -59,6 +59,7 @@ bash_comp = dependency('bash-completion', required: false)
 fish_comp = dependency('fish', required: false)
 math = cc.find_library('m')
 rt = cc.find_library('rt')
+trawldb = dependency('trawldb-0')
 
 # Try first to find wlroots as a subproject, then as a system dependency
 wlroots_version = ['>=0.15.0', '<0.16.0']
@@ -244,7 +245,7 @@ configure_file(
 )
 
 install_data(
-	'sway.desktop',
+	'sway-regolith.desktop',
 	install_dir: join_paths(datadir, 'wayland-sessions')
 )
 
