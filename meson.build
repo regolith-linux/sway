@@ -1,5 +1,5 @@
 project(
-	'sway',
+	'sway-regolith',
 	'c',
 	version: '1.8',
 	license: 'MIT',
@@ -70,6 +70,7 @@ math = cc.find_library('m')
 rt = cc.find_library('rt')
 xcb_icccm = dependency('xcb-icccm', required: get_option('xwayland'))
 threads = dependency('threads') # for pthread_setschedparam
+trawldb = dependency('trawldb-0')
 
 wlroots_features = {
 	'xwayland': false,
@@ -241,7 +242,7 @@ configure_file(
 )
 
 install_data(
-	'sway.desktop',
+	'sway-regolith.desktop',
 	install_dir: join_paths(datadir, 'wayland-sessions')
 )
 

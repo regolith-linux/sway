@@ -102,6 +102,7 @@ sway_sources = files(
 	'commands/seat/shortcuts_inhibitor.c',
 	'commands/seat/xcursor_theme.c',
 	'commands/set.c',
+	'commands/set_from_resource.c',
 	'commands/show_marks.c',
 	'commands/shortcuts_inhibitor.c',
 	'commands/smart_borders.c',
@@ -228,6 +229,7 @@ sway_deps = [
 	wlroots,
 	xkbcommon,
 	xcb_icccm,
+        trawldb
 ]
 
 if have_xwayland
@@ -236,8 +238,8 @@ if have_xwayland
 endif
 
 executable(
-	'sway',
-	sway_sources + wl_protos_src,
+	'sway-regolith',
+	sway_sources,
 	include_directories: [sway_inc],
 	dependencies: sway_deps,
 	link_with: [lib_sway_common],
