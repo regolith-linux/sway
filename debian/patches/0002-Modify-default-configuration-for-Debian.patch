@@ -1,0 +1,25 @@
+From 6505312841f4ced790ad46ba2d89c387bd932107 Mon Sep 17 00:00:00 2001
+From: Birger Schacht <birger@debian.org>
+Date: Thu, 5 Nov 2020 22:28:39 +0100
+Subject: [PATCH] Modify default configuration for Debian
+
+---
+ config.in | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/config.in b/config.in
+index 94050ba6..19d3ecb3 100644
+--- a/config.in
++++ b/config.in
+@@ -20,6 +20,8 @@ set $term foot
+ # on the original workspace that the command was run on.
+ set $menu dmenu_path | dmenu | xargs swaymsg exec --
+ 
++include /etc/sway/config-vars.d/*
++
+ ### Output configuration
+ #
+ # Default wallpaper (more resolutions are available in @datadir@/backgrounds/sway/)
+-- 
+2.34.1
+
