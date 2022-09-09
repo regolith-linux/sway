@@ -162,6 +162,18 @@ endif
 add_project_arguments('-DSYSCONFDIR="/@0@"'.format(join_paths(prefix, sysconfdir)), language : 'c')
 
 version = '"@0@"'.format(meson.project_version())
+git = find_program('git', native: true, required: false)
+if git.found()
+	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check: false)
+	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check: false)
+	if git_commit.returncode() == 0 and git_branch.returncode() == 0
+		version = '"@0@-@1@ (" __DATE__ ", branch \'@2@\')"'.format(
+			meson.project_version(),
+			git_commit.stdout().strip(),
+			git_branch.stdout().strip(),
+		)
+	endif
+endif
 add_project_arguments('-DSWAY_VERSION=@0@'.format(version), language: 'c')
 
 # Compute the relative path used by compiler invocations.
@@ -258,7 +270,7 @@ if get_option('zsh-completions')
 		'completions/zsh/_sway',
 		'completions/zsh/_swaymsg',
 	)
-	zsh_install_dir = join_paths(datadir, 'zsh', 'vendor-completions')
+	zsh_install_dir = join_paths(datadir, 'zsh', 'site-functions')
 
 	install_data(zsh_files, install_dir: zsh_install_dir)
 endif
