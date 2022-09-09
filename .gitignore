@@ -13,3 +13,4 @@ wayland-*-protocol.*
 subprojects
 *.orig
 *.rej
+.pc
