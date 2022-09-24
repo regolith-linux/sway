@@ -703,7 +703,7 @@ struct criteria *criteria_parse(char *raw, char **error_arg) {
 				}
 			}
 			value = calloc(head - valuestart + 1, 1);
-			strncpy(value, valuestart, head - valuestart);
+			memcpy(value, valuestart, head - valuestart);
 			if (in_quotes) {
 				++head;
 				in_quotes = false;
