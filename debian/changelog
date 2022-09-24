@@ -1,3 +1,9 @@
+sway-regolith (1.7-3) focal; urgency=medium
+
+  * Do not install wallpaper to avoid package collision with sway-backgrounds
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Sat, 24 Sep 2022 10:21:14 -0700
+
 sway-regolith (1.7-2) focal; urgency=medium
 
   [ Soumya Ranjan Patnaik ]
