@@ -232,11 +232,6 @@ configure_file(
 	install_dir: join_paths(sysconfdir, 'sway')
 )
 
-install_data(
-	'sway-regolith.desktop',
-	install_dir: join_paths(datadir, 'wayland-sessions')
-)
-
 if get_option('default-wallpaper')
 	wallpaper_files = files(
 		'assets/Sway_Wallpaper_Blue_768x1024.png',
