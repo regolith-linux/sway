@@ -1,3 +1,9 @@
+sway-regolith (1.7-4) focal; urgency=medium
+
+  * Remove sway-regolith.desktop file
+
+ -- Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>  Thu, 15 Dec 2022 01:53:15 +0530
+
 sway-regolith (1.7-3) focal; urgency=medium
 
   * Do not install wallpaper to avoid package collision with sway-backgrounds
