@@ -36,6 +36,9 @@ Rules-Requires-Root: no
 
 Package: sway-regolith
 Architecture: any
+Provides: sway
+Conflicts: sway
+Replaces: sway
 Depends: libgl1-mesa-dri, swaybg, policykit-1, libtrawldb, ${misc:Depends}, ${shlibs:Depends}
 Recommends: suckless-tools, sway-backgrounds, foot
 Suggests: swayidle, swaylock, xdg-desktop-portal-wlr
