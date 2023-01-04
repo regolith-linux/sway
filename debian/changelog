@@ -1,3 +1,9 @@
+sway-regolith (1.7-5) focal; urgency=medium
+
+  * Updated control to provide sway
+
+ -- Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>  Wed, 04 Jan 2023 18:40:34 +0530
+
 sway-regolith (1.7-4) focal; urgency=medium
 
   * Remove sway-regolith.desktop file
