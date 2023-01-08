@@ -1,3 +1,17 @@
+sway-regolith (1.7-6) focal; urgency=medium
+
+  [ Soumya Ranjan Patnaik ]
+  * Fixed tray context menu, v1.7-5 didn't bring in the required changes
+
+ -- Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>  Mon, 09 Jan 2023 10:57:42 +0530
+
+sway-regolith (1.7-5) focal; urgency=medium
+
+  [ Soumya Ranjan Patnaik ]
+  * Support for tray context menu
+
+ -- soumyarp <soumyaranjan1812@gmail.com>  Mon, 09 Jan 2023 04:24:58 +0530
+
 sway-regolith (1.7-5) focal; urgency=medium
 
   * Updated control to provide sway
