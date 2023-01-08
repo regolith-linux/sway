@@ -102,7 +102,7 @@ struct cmd_results *output_cmd_background(int argc, char **argv) {
 			}
 
 			char *conf_path = dirname(conf);
-			char *rel_path = src;
+			char *rel_path = strdup(src);
 			src = malloc(strlen(conf_path) + strlen(src) + 2);
 			if (!src) {
 				free(rel_path);

@@ -10,6 +10,10 @@
 #include "swaybar/input.h"
 #include "swaybar/ipc.h"
 
+#if HAVE_TRAY
+#include "swaybar/tray/dbusmenu.h"
+#endif
+
 void free_hotspots(struct wl_list *list) {
 	struct swaybar_hotspot *hotspot, *tmp;
 	wl_list_for_each_safe(hotspot, tmp, list, link) {
@@ -112,19 +116,38 @@ static void wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
 		}
 	}
 	update_cursor(seat);
+
+#if HAVE_TRAY
+	if (dbusmenu_pointer_enter(data, wl_pointer, serial, surface, surface_x,
+		surface_y)) {
+		return;
+	}
+#endif
 }
 
 static void wl_pointer_leave(void *data, struct wl_pointer *wl_pointer,
 		uint32_t serial, struct wl_surface *surface) {
+#if HAVE_TRAY
+	if (dbusmenu_pointer_leave(data, wl_pointer, serial, surface)) {
+		return;
+	}
+#endif
+
 	struct swaybar_seat *seat = data;
 	seat->pointer.current = NULL;
 }
 
 static void wl_pointer_motion(void *data, struct wl_pointer *wl_pointer,
 		uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y) {
+#if HAVE_TRAY
 	struct swaybar_seat *seat = data;
 	seat->pointer.x = wl_fixed_to_double(surface_x);
 	seat->pointer.y = wl_fixed_to_double(surface_y);
+
+	if (dbusmenu_pointer_motion(data, wl_pointer, time, surface_x, surface_y)) {
+		return;
+	}
+#endif
 }
 
 static bool check_bindings(struct swaybar *bar, uint32_t button,
@@ -141,13 +164,14 @@ static bool check_bindings(struct swaybar *bar, uint32_t button,
 }
 
 static bool process_hotspots(struct swaybar_output *output,
-		double x, double y, uint32_t button) {
+		struct swaybar_seat *seat, uint32_t serial, double x, double y,
+		uint32_t button) {
 	struct swaybar_hotspot *hotspot;
 	wl_list_for_each(hotspot, &output->hotspots, link) {
 		if (x >= hotspot->x && y >= hotspot->y
 				&& x < hotspot->x + hotspot->width
 				&& y < hotspot->y + hotspot->height) {
-			if (HOTSPOT_IGNORE == hotspot->callback(output, hotspot, x, y,
+			if (HOTSPOT_IGNORE == hotspot->callback(output, hotspot, seat, serial, x, y,
 					button, hotspot->data)) {
 				return true;
 			}
@@ -160,6 +184,12 @@ static bool process_hotspots(struct swaybar_output *output,
 static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
 		uint32_t serial, uint32_t time, uint32_t button, uint32_t state) {
 	struct swaybar_seat *seat = data;
+#if HAVE_TRAY
+	if (dbusmenu_pointer_button(seat, wl_pointer, serial, time, button,
+				state)) {
+		return;
+	}
+#endif
 	struct swaybar_pointer *pointer = &seat->pointer;
 	struct swaybar_output *output = pointer->current;
 	if (!sway_assert(output, "button with no active output")) {
@@ -173,7 +203,7 @@ static void wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
 	if (state != WL_POINTER_BUTTON_STATE_PRESSED) {
 		return;
 	}
-	process_hotspots(output, pointer->x, pointer->y, button);
+	process_hotspots(output, seat, serial, pointer->x, pointer->y, button);
 }
 
 static void workspace_next(struct swaybar *bar, struct swaybar_output *output,
@@ -230,7 +260,7 @@ static void process_discrete_scroll(struct swaybar_seat *seat,
 		return;
 	}
 
-	if (process_hotspots(output, pointer->x, pointer->y, button)) {
+	if (process_hotspots(output, seat, 0, pointer->x, pointer->y, button)) {
 		return;
 	}
 
@@ -280,6 +310,12 @@ static void wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
 		return;
 	}
 
+#if HAVE_TRAY
+	if (dbusmenu_pointer_axis(data, wl_pointer)) {
+		return;
+	}
+#endif
+
 	// If there's a while since the last scroll event,
 	// set 'value' to zero as if to reset the "virtual scroll wheel"
 	if (seat->axis[axis].discrete_steps == 0 &&
@@ -295,6 +331,12 @@ static void wl_pointer_frame(void *data, struct wl_pointer *wl_pointer) {
 	struct swaybar_seat *seat = data;
 	struct swaybar_pointer *pointer = &seat->pointer;
 	struct swaybar_output *output = pointer->current;
+
+#if HAVE_TRAY
+	if (dbusmenu_pointer_frame(data, wl_pointer)) {
+		return;
+	}
+#endif
 
 	if (output == NULL) {
 		return;
@@ -403,7 +445,7 @@ static void wl_touch_up(void *data, struct wl_touch *wl_touch,
 	}
 	if (time - slot->time < 500) {
 		// Tap, treat it like a pointer click
-		process_hotspots(slot->output, slot->x, slot->y, BTN_LEFT);
+		process_hotspots(slot->output, seat, serial, slot->x, slot->y, BTN_LEFT);
 	}
 	slot->output = NULL;
 }
