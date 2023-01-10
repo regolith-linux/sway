@@ -4,6 +4,7 @@
 #include <string.h>
 #include <strings.h>
 #include <time.h>
+#include <wlr/config.h>
 #include <wlr/types/wlr_cursor.h>
 #include <wlr/types/wlr_data_device.h>
 #include <wlr/types/wlr_idle.h>
@@ -382,8 +383,8 @@ void drag_icon_update_position(struct sway_drag_icon *icon) {
 	case WLR_DRAG_GRAB_KEYBOARD:
 		return;
 	case WLR_DRAG_GRAB_KEYBOARD_POINTER:
-		icon->x = cursor->x + wlr_icon->surface->sx;
-		icon->y = cursor->y + wlr_icon->surface->sy;
+		icon->x = cursor->x + icon->dx;
+		icon->y = cursor->y + icon->dy;
 		break;
 	case WLR_DRAG_GRAB_KEYBOARD_TOUCH:;
 		struct wlr_touch_point *point =
@@ -391,8 +392,8 @@ void drag_icon_update_position(struct sway_drag_icon *icon) {
 		if (point == NULL) {
 			return;
 		}
-		icon->x = seat->touch_x + wlr_icon->surface->sx;
-		icon->y = seat->touch_y + wlr_icon->surface->sy;
+		icon->x = seat->touch_x + icon->dx;
+		icon->y = seat->touch_y + icon->dy;
 	}
 
 	drag_icon_damage_whole(icon);
@@ -402,6 +403,9 @@ static void drag_icon_handle_surface_commit(struct wl_listener *listener,
 		void *data) {
 	struct sway_drag_icon *icon =
 		wl_container_of(listener, icon, surface_commit);
+	struct wlr_drag_icon *wlr_icon = icon->wlr_drag_icon;
+	icon->dx += wlr_icon->surface->current.dx;
+	icon->dy += wlr_icon->surface->current.dy;
 	drag_icon_update_position(icon);
 }
 
@@ -747,6 +751,7 @@ static void seat_apply_input_config(struct sway_seat *seat,
 			mapped_to_output = NULL;
 			break;
 		}
+#if WLR_HAS_LIBINPUT_BACKEND
 		if (mapped_to_output == NULL && is_touch_or_tablet_tool(sway_device) &&
 				sway_libinput_device_is_builtin(sway_device->input_device)) {
 			mapped_to_output = get_builtin_output_name();
@@ -755,6 +760,10 @@ static void seat_apply_input_config(struct sway_seat *seat,
 					mapped_to_output, sway_device->input_device->identifier);
 			}
 		}
+#else
+		(void)is_touch_or_tablet_tool;
+		(void)get_builtin_output_name;
+#endif
 		if (mapped_to_output == NULL) {
 			return;
 		}
@@ -814,8 +823,15 @@ static void seat_configure_keyboard(struct sway_seat *seat,
 		sway_keyboard_create(seat, seat_device);
 	}
 	sway_keyboard_configure(seat_device->keyboard);
-	wlr_seat_set_keyboard(seat->wlr_seat,
-		wlr_keyboard_from_input_device(seat_device->input_device->wlr_device));
+
+	// We only need to update the current keyboard, as the rest will be updated
+	// as they are activated.
+	struct wlr_keyboard *wlr_keyboard =
+		wlr_keyboard_from_input_device(seat_device->input_device->wlr_device);
+	struct wlr_keyboard *current_keyboard = seat->wlr_seat->keyboard_state.keyboard;
+	if (wlr_keyboard != current_keyboard) {
+		return;
+	}
 
 	// force notify reenter to pick up the new configuration.  This reuses
 	// the current focused surface to avoid breaking input grabs.

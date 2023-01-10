@@ -3,7 +3,6 @@
 #include <stdbool.h>
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
-#include <wlr/backend/session.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_compositor.h>
@@ -34,6 +33,7 @@ struct sway_server {
 	const char *socket;
 
 	struct wlr_backend *backend;
+	struct wlr_session *session;
 	// secondary headless backend used for creating virtual outputs on-the-fly
 	struct wlr_backend *headless_backend;
 	struct wlr_renderer *renderer;
@@ -110,9 +110,12 @@ struct sway_server {
 	struct wlr_input_method_manager_v2 *input_method;
 	struct wlr_text_input_manager_v3 *text_input;
 	struct wlr_foreign_toplevel_manager_v1 *foreign_toplevel_manager;
+	struct wlr_content_type_manager_v1 *content_type_manager_v1;
 
 	struct wlr_xdg_activation_v1 *xdg_activation_v1;
 	struct wl_listener xdg_activation_v1_request_activate;
+
+	struct wl_list pending_launcher_ctxs; // launcher_ctx::link
 
 	// The timeout for transactions, after which a transaction is applied
 	// regardless of readiness.

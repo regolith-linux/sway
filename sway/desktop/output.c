@@ -4,11 +4,10 @@
 #include <strings.h>
 #include <time.h>
 #include <wayland-server-core.h>
-#include <wlr/backend/drm.h>
+#include <wlr/config.h>
 #include <wlr/backend/headless.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_buffer.h>
-#include <wlr/types/wlr_drm_lease_v1.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_layout.h>
 #include <wlr/types/wlr_output.h>
@@ -30,6 +29,11 @@
 #include "sway/tree/root.h"
 #include "sway/tree/view.h"
 #include "sway/tree/workspace.h"
+
+#if WLR_HAS_DRM_BACKEND
+#include <wlr/backend/drm.h>
+#include <wlr/types/wlr_drm_lease_v1.h>
+#endif
 
 struct sway_output *output_by_name_or_id(const char *name_or_id) {
 	for (int i = 0; i < root->outputs->length; ++i) {
@@ -360,14 +364,14 @@ overlay:
 }
 
 static int scale_length(int length, int offset, float scale) {
-	return round((offset + length) * scale) - round(offset * scale);
+	return roundf((offset + length) * scale) - roundf(offset * scale);
 }
 
 void scale_box(struct wlr_box *box, float scale) {
 	box->width = scale_length(box->width, box->x, scale);
 	box->height = scale_length(box->height, box->y, scale);
-	box->x = round(box->x * scale);
-	box->y = round(box->y * scale);
+	box->x = roundf(box->x * scale);
+	box->y = roundf(box->y * scale);
 }
 
 struct sway_workspace *output_get_active_workspace(struct sway_output *output) {
@@ -679,11 +683,11 @@ static void damage_surface_iterator(struct sway_output *output,
 	pixman_region32_init(&damage);
 	wlr_surface_get_effective_damage(surface, &damage);
 	wlr_region_scale(&damage, &damage, output->wlr_output->scale);
-	if (ceil(output->wlr_output->scale) > surface->current.scale) {
+	if (ceilf(output->wlr_output->scale) > surface->current.scale) {
 		// When scaling up a surface, it'll become blurry so we need to
 		// expand the damage region
 		wlr_region_expand(&damage, &damage,
-			ceil(output->wlr_output->scale) - surface->current.scale);
+			ceilf(output->wlr_output->scale) - surface->current.scale);
 	}
 	pixman_region32_translate(&damage, box.x, box.y);
 	if (wlr_damage_ring_add(&output->damage_ring, &damage)) {
@@ -801,11 +805,11 @@ static void handle_destroy(struct wl_listener *listener, void *data) {
 
 	wl_list_remove(&output->destroy.link);
 	wl_list_remove(&output->commit.link);
-	wl_list_remove(&output->mode.link);
 	wl_list_remove(&output->present.link);
 	wl_list_remove(&output->damage.link);
 	wl_list_remove(&output->frame.link);
 	wl_list_remove(&output->needs_frame.link);
+	wl_list_remove(&output->request_state.link);
 
 	wlr_damage_ring_finish(&output->damage_ring);
 
@@ -817,8 +821,7 @@ static void handle_destroy(struct wl_listener *listener, void *data) {
 	update_output_manager_config(server);
 }
 
-static void handle_mode(struct wl_listener *listener, void *data) {
-	struct sway_output *output = wl_container_of(listener, output, mode);
+static void handle_mode(struct sway_output *output) {
 	if (!output->enabled && !output->enabling) {
 		struct output_config *oc = find_output_config(output);
 		if (output->wlr_output->current_mode != NULL &&
@@ -857,6 +860,10 @@ static void handle_commit(struct wl_listener *listener, void *data) {
 	struct sway_output *output = wl_container_of(listener, output, commit);
 	struct wlr_output_event_commit *event = data;
 
+	if (event->committed & WLR_OUTPUT_STATE_MODE) {
+		handle_mode(output);
+	}
+
 	if (!output->enabled) {
 		return;
 	}
@@ -893,6 +900,13 @@ static void handle_present(struct wl_listener *listener, void *data) {
 	output->refresh_nsec = output_event->refresh;
 }
 
+static void handle_request_state(struct wl_listener *listener, void *data) {
+	struct sway_output *output =
+		wl_container_of(listener, output, request_state);
+	const struct wlr_output_event_request_state *event = data;
+	wlr_output_commit_state(output->wlr_output, event->state);
+}
+
 static unsigned int last_headless_num = 0;
 
 void handle_new_output(struct wl_listener *listener, void *data) {
@@ -915,10 +929,12 @@ void handle_new_output(struct wl_listener *listener, void *data) {
 	if (wlr_output->non_desktop) {
 		sway_log(SWAY_DEBUG, "Not configuring non-desktop output");
 		struct sway_output_non_desktop *non_desktop = output_non_desktop_create(wlr_output);
+#if WLR_HAS_DRM_BACKEND
 		if (server->drm_lease_manager) {
 			wlr_drm_lease_v1_manager_offer_output(server->drm_lease_manager,
 					wlr_output);
 		}
+#endif
 		list_add(root->non_desktop_outputs, non_desktop);
 		return;
 	}
@@ -940,8 +956,6 @@ void handle_new_output(struct wl_listener *listener, void *data) {
 	output->destroy.notify = handle_destroy;
 	wl_signal_add(&wlr_output->events.commit, &output->commit);
 	output->commit.notify = handle_commit;
-	wl_signal_add(&wlr_output->events.mode, &output->mode);
-	output->mode.notify = handle_mode;
 	wl_signal_add(&wlr_output->events.present, &output->present);
 	output->present.notify = handle_present;
 	wl_signal_add(&wlr_output->events.damage, &output->damage);
@@ -950,6 +964,8 @@ void handle_new_output(struct wl_listener *listener, void *data) {
 	output->frame.notify = handle_frame;
 	wl_signal_add(&wlr_output->events.needs_frame, &output->needs_frame);
 	output->needs_frame.notify = handle_needs_frame;
+	wl_signal_add(&wlr_output->events.request_state, &output->request_state);
+	output->request_state.notify = handle_request_state;
 
 	output->repaint_timer = wl_event_loop_add_timer(server->wl_event_loop,
 		output_repaint_timer_handler, output);

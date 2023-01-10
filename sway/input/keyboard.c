@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <limits.h>
 #include <strings.h>
+#include <wlr/config.h>
 #include <wlr/backend/multi.h>
-#include <wlr/backend/session.h>
 #include <wlr/interfaces/wlr_keyboard.h>
 #include <wlr/types/wlr_idle.h>
 #include <wlr/types/wlr_keyboard.h>
@@ -15,6 +15,10 @@
 #include "sway/input/cursor.h"
 #include "sway/ipc-server.h"
 #include "log.h"
+
+#if WLR_HAS_SESSION
+#include <wlr/backend/session.h>
+#endif
 
 static struct modifier_key {
 	char *name;
@@ -264,14 +268,12 @@ static bool keyboard_execute_compositor_binding(struct sway_keyboard *keyboard,
 		xkb_keysym_t keysym = pressed_keysyms[i];
 		if (keysym >= XKB_KEY_XF86Switch_VT_1 &&
 				keysym <= XKB_KEY_XF86Switch_VT_12) {
-			if (wlr_backend_is_multi(server.backend)) {
-				struct wlr_session *session =
-					wlr_backend_get_session(server.backend);
-				if (session) {
-					unsigned vt = keysym - XKB_KEY_XF86Switch_VT_1 + 1;
-					wlr_session_change_vt(session, vt);
-				}
+#if WLR_HAS_SESSION
+			if (server.session) {
+				unsigned vt = keysym - XKB_KEY_XF86Switch_VT_1 + 1;
+				wlr_session_change_vt(server.session, vt);
 			}
+#endif
 			return true;
 		}
 	}
@@ -1068,8 +1070,12 @@ void sway_keyboard_configure(struct sway_keyboard *keyboard) {
 		}
 	}
 
+	// If the seat has no active keyboard, set this one
 	struct wlr_seat *seat = keyboard->seat_device->sway_seat->wlr_seat;
-	wlr_seat_set_keyboard(seat, keyboard->wlr);
+	struct wlr_keyboard *current_keyboard = seat->keyboard_state.keyboard;
+	if (current_keyboard == NULL) {
+		wlr_seat_set_keyboard(seat, keyboard->wlr);
+	}
 
 	wl_list_remove(&keyboard->keyboard_key.link);
 	wl_signal_add(&keyboard->wlr->events.key, &keyboard->keyboard_key);

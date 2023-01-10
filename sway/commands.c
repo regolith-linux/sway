@@ -82,6 +82,7 @@ static const struct cmd_handler handlers[] = {
 	{ "no_focus", cmd_no_focus },
 	{ "output", cmd_output },
 	{ "popup_during_fullscreen", cmd_popup_during_fullscreen },
+	{ "primary_selection", cmd_primary_selection },
 	{ "seat", cmd_seat },
 	{ "set", cmd_set },
 	{ "set_from_resource", cmd_set_from_resource},
@@ -148,7 +149,7 @@ static int handler_compare(const void *_a, const void *_b) {
 	return strcasecmp(a->command, b->command);
 }
 
-const struct cmd_handler *find_handler(char *line,
+const struct cmd_handler *find_handler(const char *line,
 		const struct cmd_handler *handlers, size_t handlers_size) {
 	if (!handlers || !handlers_size) {
 		return NULL;

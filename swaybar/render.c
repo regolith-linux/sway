@@ -160,7 +160,7 @@ static void render_sharp_line(cairo_t *cairo, uint32_t color,
 
 static enum hotspot_event_handling block_hotspot_callback(
 		struct swaybar_output *output, struct swaybar_hotspot *hotspot,
-		double x, double y, uint32_t button, void *data) {
+		double x, double y, uint32_t button, bool released, void *data) {
 	struct i3bar_block *block = data;
 	struct status_line *status = output->bar->status;
 	return i3bar_block_send_click(status, block, x, y,
@@ -168,7 +168,7 @@ static enum hotspot_event_handling block_hotspot_callback(
 			y - (double)hotspot->y,
 			(double)hotspot->width,
 			(double)hotspot->height,
-			output->scale, button);
+			output->scale, button, released);
 }
 
 static void i3bar_block_unref_callback(void *data) {
@@ -292,7 +292,7 @@ static uint32_t render_status_block(struct render_context *ctx,
 	}
 
 	double offset = 0;
-	if (strncmp(block->align, "left", 5) == 0) {
+	if (strncmp(block->align, "left", 4) == 0) {
 		offset = x_pos;
 	} else if (strncmp(block->align, "right", 5) == 0) {
 		offset = x_pos + width - text_width;
@@ -599,9 +599,14 @@ static uint32_t render_binding_mode_indicator(struct render_context *ctx,
 
 static enum hotspot_event_handling workspace_hotspot_callback(
 		struct swaybar_output *output, struct swaybar_hotspot *hotspot,
-		double x, double y, uint32_t button, void *data) {
+		double x, double y, uint32_t button, bool released, void *data) {
 	if (button != BTN_LEFT) {
 		return HOTSPOT_PROCESS;
+	}
+	if (released) {
+		// Since we handle the pressed event, also handle the released event
+		// to block it from falling through to a binding in the bar
+		return HOTSPOT_IGNORE;
 	}
 	ipc_send_workspace_command(output->bar, (const char *)data);
 	return HOTSPOT_IGNORE;

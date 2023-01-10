@@ -9,7 +9,7 @@ struct sway_container;
 typedef struct cmd_results *sway_cmd(int argc, char **argv);
 
 struct cmd_handler {
-	char *command;
+	const char *command;
 	sway_cmd *handle;
 };
 
@@ -46,7 +46,7 @@ enum expected_args {
 struct cmd_results *checkarg(int argc, const char *name,
 		enum expected_args type, int val);
 
-const struct cmd_handler *find_handler(char *line,
+const struct cmd_handler *find_handler(const char *line,
 		const struct cmd_handler *cmd_handlers, size_t handlers_size);
 
 /**
@@ -159,12 +159,11 @@ sway_cmd cmd_new_float;
 sway_cmd cmd_new_window;
 sway_cmd cmd_nop;
 sway_cmd cmd_opacity;
-sway_cmd cmd_new_float;
-sway_cmd cmd_new_window;
 sway_cmd cmd_no_focus;
 sway_cmd cmd_output;
 sway_cmd cmd_permit;
 sway_cmd cmd_popup_during_fullscreen;
+sway_cmd cmd_primary_selection;
 sway_cmd cmd_reject;
 sway_cmd cmd_reload;
 sway_cmd cmd_rename;
@@ -262,6 +261,7 @@ sway_cmd input_cmd_map_to_region;
 sway_cmd input_cmd_middle_emulation;
 sway_cmd input_cmd_natural_scroll;
 sway_cmd input_cmd_pointer_accel;
+sway_cmd input_cmd_rotation_angle;
 sway_cmd input_cmd_scroll_factor;
 sway_cmd input_cmd_repeat_delay;
 sway_cmd input_cmd_repeat_rate;

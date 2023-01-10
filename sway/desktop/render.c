@@ -1,11 +1,10 @@
 #define _POSIX_C_SOURCE 200809L
 #include <assert.h>
-#include <GLES2/gl2.h>
 #include <stdlib.h>
 #include <strings.h>
 #include <time.h>
 #include <wayland-server-core.h>
-#include <wlr/render/gles2.h>
+#include <wlr/config.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_buffer.h>
 #include <wlr/types/wlr_damage_ring.h>
@@ -28,6 +27,10 @@
 #include "sway/tree/view.h"
 #include "sway/tree/workspace.h"
 
+#if WLR_HAS_GLES2_RENDERER
+#include <wlr/render/gles2.h>
+#endif
+
 struct render_data {
 	pixman_region32_t *damage;
 	float alpha;
@@ -47,7 +50,7 @@ struct render_data {
  * scaled to 2px.
  */
 static int scale_length(int length, int offset, float scale) {
-	return round((offset + length) * scale) - round(offset * scale);
+	return roundf((offset + length) * scale) - roundf(offset * scale);
 }
 
 static void scissor_output(struct wlr_output *wlr_output,
@@ -74,6 +77,7 @@ static void scissor_output(struct wlr_output *wlr_output,
 
 static void set_scale_filter(struct wlr_output *wlr_output,
 		struct wlr_texture *texture, enum scale_filter_mode scale_filter) {
+#if WLR_HAS_GLES2_RENDERER
 	if (!wlr_texture_is_gles2(texture)) {
 		return;
 	}
@@ -94,6 +98,7 @@ static void set_scale_filter(struct wlr_output *wlr_output,
 	case SCALE_FILTER_SMART:
 		assert(false); // unreachable
 	}
+#endif
 }
 
 static void render_texture(struct wlr_output *wlr_output,
@@ -477,7 +482,7 @@ static void render_titlebar(struct sway_output *output,
 	size_t inner_width = width - titlebar_h_padding * 2;
 
 	// output-buffer local
-	int ob_inner_x = round(inner_x * output_scale);
+	int ob_inner_x = roundf(inner_x * output_scale);
 	int ob_inner_width = scale_length(inner_width, inner_x, output_scale);
 	int ob_bg_height = scale_length(
 			(titlebar_v_padding - titlebar_border_thickness) * 2 +
@@ -526,7 +531,7 @@ static void render_titlebar(struct sway_output *output,
 		memcpy(&color, colors->background, sizeof(float) * 4);
 		premultiply_alpha(color, con->alpha);
 		box.x = texture_box.x + round(output_x * output_scale);
-		box.y = round((y + titlebar_border_thickness) * output_scale);
+		box.y = roundf((y + titlebar_border_thickness) * output_scale);
 		box.width = texture_box.width;
 		box.height = ob_padding_above;
 		render_rect(output, output_damage, &box, color);
@@ -557,7 +562,7 @@ static void render_titlebar(struct sway_output *output,
 
 		// The title texture might be shorter than the config->font_height,
 		// in which case we need to pad it above and below.
-		int ob_padding_above = round((titlebar_v_padding -
+		int ob_padding_above = roundf((titlebar_v_padding -
 					titlebar_border_thickness) * output_scale);
 		int ob_padding_below = ob_bg_height - ob_padding_above -
 			texture_box.height;
@@ -602,7 +607,7 @@ static void render_titlebar(struct sway_output *output,
 		memcpy(&color, colors->background, sizeof(float) * 4);
 		premultiply_alpha(color, con->alpha);
 		box.x = texture_box.x + round(output_x * output_scale);
-		box.y = round((y + titlebar_border_thickness) * output_scale);
+		box.y = roundf((y + titlebar_border_thickness) * output_scale);
 		box.width = texture_box.width;
 		box.height = ob_padding_above;
 		render_rect(output, output_damage, &box, color);
@@ -642,7 +647,7 @@ static void render_titlebar(struct sway_output *output,
 	box.width = ob_right_x - ob_left_x - ob_left_width;
 	if (box.width > 0) {
 		box.x = ob_left_x + ob_left_width + round(output_x * output_scale);
-		box.y = round(bg_y * output_scale);
+		box.y = roundf(bg_y * output_scale);
 		box.height = ob_bg_height;
 		render_rect(output, output_damage, &box, color);
 	}
