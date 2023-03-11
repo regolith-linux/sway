@@ -14,6 +14,7 @@
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_drm.h>
 #include <wlr/types/wlr_export_dmabuf_v1.h>
+#include <wlr/types/wlr_fractional_scale_v1.h>
 #include <wlr/types/wlr_gamma_control_v1.h>
 #include <wlr/types/wlr_idle.h>
 #include <wlr/types/wlr_idle_notify_v1.h>
@@ -214,6 +215,7 @@ bool server_init(struct sway_server *server) {
 	wlr_single_pixel_buffer_manager_v1_create(server->wl_display);
 	server->content_type_manager_v1 =
 		wlr_content_type_manager_v1_create(server->wl_display, 1);
+	wlr_fractional_scale_manager_v1_create(server->wl_display, 1);
 
 	struct wlr_xdg_foreign_registry *foreign_registry =
 		wlr_xdg_foreign_registry_create(server->wl_display);
@@ -225,6 +227,10 @@ bool server_init(struct sway_server *server) {
 		xdg_activation_v1_handle_request_activate;
 	wl_signal_add(&server->xdg_activation_v1->events.request_activate,
 		&server->xdg_activation_v1_request_activate);
+	server->xdg_activation_v1_new_token.notify =
+		xdg_activation_v1_handle_new_token;
+	wl_signal_add(&server->xdg_activation_v1->events.new_token,
+		&server->xdg_activation_v1_new_token);
 
 	wl_list_init(&server->pending_launcher_ctxs);
 

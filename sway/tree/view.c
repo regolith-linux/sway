@@ -25,6 +25,7 @@
 #include "sway/output.h"
 #include "sway/input/seat.h"
 #include "sway/server.h"
+#include "sway/surface.h"
 #include "sway/tree/arrange.h"
 #include "sway/tree/container.h"
 #include "sway/tree/view.h"
@@ -366,17 +367,17 @@ void view_set_activated(struct sway_view *view, bool activated) {
 	}
 }
 
-void view_request_activate(struct sway_view *view) {
+void view_request_activate(struct sway_view *view, struct sway_seat *seat) {
 	struct sway_workspace *ws = view->container->pending.workspace;
-	if (!ws) { // hidden scratchpad container
-		return;
+	if (!seat) {
+		seat = input_manager_current_seat();
 	}
-	struct sway_seat *seat = input_manager_current_seat();
 
 	switch (config->focus_on_window_activation) {
 	case FOWA_SMART:
-		if (workspace_is_visible(ws)) {
+		if (ws && workspace_is_visible(ws)) {
 			seat_set_focus_container(seat, view->container);
+			container_raise_floating(view->container);
 		} else {
 			view_set_urgent(view, true);
 		}
@@ -385,11 +386,17 @@ void view_request_activate(struct sway_view *view) {
 		view_set_urgent(view, true);
 		break;
 	case FOWA_FOCUS:
-		seat_set_focus_container(seat, view->container);
+		if (container_is_scratchpad_hidden_or_child(view->container)) {
+			root_scratchpad_show(view->container);
+		} else {
+			seat_set_focus_container(seat, view->container);
+			container_raise_floating(view->container);
+		}
 		break;
 	case FOWA_NONE:
 		break;
 	}
+	transaction_commit_dirty();
 }
 
 void view_set_csd_from_server(struct sway_view *view, bool enabled) {
@@ -523,7 +530,7 @@ static void view_populate_pid(struct sway_view *view) {
 #if HAVE_XWAYLAND
 	case SWAY_VIEW_XWAYLAND:;
 		struct wlr_xwayland_surface *surf =
-			wlr_xwayland_surface_from_wlr_surface(view->surface);
+			wlr_xwayland_surface_try_from_wlr_surface(view->surface);
 		pid = surf->pid;
 		break;
 #endif
@@ -850,9 +857,8 @@ void view_map(struct sway_view *view, struct wlr_surface *wlr_surface,
 	bool set_focus = should_focus(view);
 
 #if HAVE_XWAYLAND
-	if (wlr_surface_is_xwayland_surface(wlr_surface)) {
-		struct wlr_xwayland_surface *xsurface =
-				wlr_xwayland_surface_from_wlr_surface(wlr_surface);
+	struct wlr_xwayland_surface *xsurface;
+	if ((xsurface = wlr_xwayland_surface_try_from_wlr_surface(wlr_surface))) {
 		set_focus &= wlr_xwayland_icccm_input_model(xsurface) !=
 				WLR_ICCCM_INPUT_MODEL_NONE;
 	}
@@ -949,7 +955,7 @@ static void subsurface_get_view_coords(struct sway_view_child *child,
 		*sx = *sy = 0;
 	}
 	struct wlr_subsurface *subsurface =
-		wlr_subsurface_from_wlr_surface(surface);
+		wlr_subsurface_try_from_wlr_surface(surface);
 	*sx += subsurface->current.x;
 	*sy += subsurface->current.y;
 }
@@ -1144,7 +1150,7 @@ void view_child_init(struct sway_view_child *child,
 	if (container != NULL) {
 		struct sway_workspace *workspace = container->pending.workspace;
 		if (workspace) {
-			wlr_surface_send_enter(child->surface, workspace->output->wlr_output);
+			surface_enter_output(child->surface, workspace->output);
 		}
 	}
 
@@ -1185,33 +1191,21 @@ void view_child_destroy(struct sway_view_child *child) {
 }
 
 struct sway_view *view_from_wlr_surface(struct wlr_surface *wlr_surface) {
-	if (wlr_surface_is_xdg_surface(wlr_surface)) {
-		struct wlr_xdg_surface *xdg_surface =
-			wlr_xdg_surface_from_wlr_surface(wlr_surface);
-		if (xdg_surface == NULL) {
-			return NULL;
-		}
+	struct wlr_xdg_surface *xdg_surface;
+	if ((xdg_surface = wlr_xdg_surface_try_from_wlr_surface(wlr_surface))) {
 		return view_from_wlr_xdg_surface(xdg_surface);
 	}
 #if HAVE_XWAYLAND
-	if (wlr_surface_is_xwayland_surface(wlr_surface)) {
-		struct wlr_xwayland_surface *xsurface =
-			wlr_xwayland_surface_from_wlr_surface(wlr_surface);
-		if (xsurface == NULL) {
-			return NULL;
-		}
+	struct wlr_xwayland_surface *xsurface;
+	if ((xsurface = wlr_xwayland_surface_try_from_wlr_surface(wlr_surface))) {
 		return view_from_wlr_xwayland_surface(xsurface);
 	}
 #endif
-	if (wlr_surface_is_subsurface(wlr_surface)) {
-		struct wlr_subsurface *subsurface =
-			wlr_subsurface_from_wlr_surface(wlr_surface);
-		if (subsurface == NULL) {
-			return NULL;
-		}
+	struct wlr_subsurface *subsurface;
+	if ((subsurface = wlr_subsurface_try_from_wlr_surface(wlr_surface))) {
 		return view_from_wlr_surface(subsurface->parent);
 	}
-	if (wlr_surface_is_layer_surface(wlr_surface)) {
+	if (wlr_layer_surface_v1_try_from_wlr_surface(wlr_surface) != NULL) {
 		return NULL;
 	}
 

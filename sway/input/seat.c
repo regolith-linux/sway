@@ -177,11 +177,11 @@ static void seat_keyboard_notify_enter(struct sway_seat *seat,
 			state->pressed_keycodes, state->npressed, &keyboard->modifiers);
 }
 
-static void seat_tablet_pads_notify_enter(struct sway_seat *seat,
+static void seat_tablet_pads_set_focus(struct sway_seat *seat,
 		struct wlr_surface *surface) {
 	struct sway_seat_device *seat_device;
 	wl_list_for_each(seat_device, &seat->devices, link) {
-		sway_tablet_pad_notify_enter(seat_device->tablet_pad, surface);
+		sway_tablet_pad_set_focus(seat_device->tablet_pad, surface);
 	}
 }
 
@@ -205,7 +205,7 @@ static void seat_send_focus(struct sway_node *node, struct sway_seat *seat) {
 #endif
 
 		seat_keyboard_notify_enter(seat, view->surface);
-		seat_tablet_pads_notify_enter(seat, view->surface);
+		seat_tablet_pads_set_focus(seat, view->surface);
 		sway_input_method_relay_set_focus(&seat->im_relay, view->surface);
 
 		struct wlr_pointer_constraint_v1 *constraint =
@@ -1089,9 +1089,20 @@ void seat_configure_xcursor(struct sway_seat *seat) {
 
 bool seat_is_input_allowed(struct sway_seat *seat,
 		struct wlr_surface *surface) {
+	if (server.session_lock.locked) {
+		if (server.session_lock.lock == NULL) {
+			return false;
+		}
+		struct wlr_session_lock_surface_v1 *lock_surf;
+		wl_list_for_each(lock_surf, &server.session_lock.lock->surfaces, link) {
+			if (lock_surf->surface == surface) {
+				return true;
+			}
+		}
+		return false;
+	}
 	struct wl_client *client = wl_resource_get_client(surface->resource);
-	return seat->exclusive_client == client ||
-		(seat->exclusive_client == NULL && !server.session_lock.locked);
+	return seat->exclusive_client == client || seat->exclusive_client == NULL;
 }
 
 static void send_unfocus(struct sway_container *con, void *data) {
@@ -1322,7 +1333,7 @@ void seat_set_focus_surface(struct sway_seat *seat,
 	}
 
 	sway_input_method_relay_set_focus(&seat->im_relay, surface);
-	seat_tablet_pads_notify_enter(seat, surface);
+	seat_tablet_pads_set_focus(seat, surface);
 }
 
 void seat_set_focus_layer(struct sway_seat *seat,
@@ -1607,6 +1618,26 @@ void seatop_pointer_axis(struct sway_seat *seat,
 	}
 }
 
+void seatop_touch_motion(struct sway_seat *seat, struct wlr_touch_motion_event *event,
+		double lx, double ly) {
+	if (seat->seatop_impl->touch_motion) {
+		seat->seatop_impl->touch_motion(seat, event, lx, ly);
+	}
+}
+
+void seatop_touch_up(struct sway_seat *seat, struct wlr_touch_up_event *event) {
+	if (seat->seatop_impl->touch_up) {
+		seat->seatop_impl->touch_up(seat, event);
+	}
+}
+
+void seatop_touch_down(struct sway_seat *seat, struct wlr_touch_down_event *event,
+		double lx, double ly) {
+	if (seat->seatop_impl->touch_down) {
+		seat->seatop_impl->touch_down(seat, event, lx, ly);
+	}
+}
+
 void seatop_tablet_tool_tip(struct sway_seat *seat,
 		struct sway_tablet_tool *tool, uint32_t time_msec,
 		enum wlr_tablet_tool_tip_state state) {
@@ -1696,7 +1727,7 @@ void seatop_end(struct sway_seat *seat) {
 }
 
 void seatop_render(struct sway_seat *seat, struct sway_output *output,
-		pixman_region32_t *damage) {
+		const pixman_region32_t *damage) {
 	if (seat->seatop_impl->render) {
 		seat->seatop_impl->render(seat, output, damage);
 	}
