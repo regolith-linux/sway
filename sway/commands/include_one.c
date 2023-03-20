@@ -39,10 +39,10 @@ void priority_configs(const char *path, const char *parent_dir, struct sway_conf
 			config_loc->name =  basename(matched_path);
 			config_loc->path = matched_path;
 			if (index == -1) {
-				list_add(locations, &config_loc);
+				list_add(locations, config_loc);
 				continue;
 			}
-			locations->items[index] = &config_loc; 
+			locations->items[index] = config_loc; 
 		}
 	}
 
@@ -53,7 +53,6 @@ void priority_configs(const char *path, const char *parent_dir, struct sway_conf
 	}
 cleanup:
 	free(wd);
-	list_free_items_and_destroy(locations);
 }
 
 struct cmd_results *cmd_include_one(int argc, char **argv) {
@@ -75,6 +74,6 @@ struct cmd_results *cmd_include_one(int argc, char **argv) {
 	for(int i=0; i<locs->length; ++i) {
 		load_include_configs (locs_arr[i]->path, config, &config->swaynag_config_errors);
 	}
-	list_free(locs);
+	list_free_items_and_destroy(locs);
 	return cmd_results_new(CMD_SUCCESS, NULL);
 }
