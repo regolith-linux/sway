@@ -13,13 +13,17 @@ typedef struct {
 	char *path;
 } config_location_map;
 
-int compare_paths(const config_location_map* item, char* abspath) {
+int compare_paths( const config_location_map* item, char* abspath) {
 	if (strcmp(item->name, basename(abspath))==0) {
 		return 0;
 	}
 	return -1;
 }
-
+void free_config_location_map(config_location_map *config_loc) {
+	free(config_loc->name);
+	free(config_loc->path);
+	free(config_loc);
+}
 void priority_configs(const char *path, const char *parent_dir, struct sway_config *config, list_t *locations) {
 	char *wd = getcwd(NULL, 0);
 
@@ -32,18 +36,20 @@ void priority_configs(const char *path, const char *parent_dir, struct sway_conf
 	if (wordexp(path, &p, 0) == 0) {
 		char **w = p.we_wordv;
 		size_t i;
+		config_location_map *config_loc = malloc(sizeof (config_location_map));
 		for (i = 0; i < p.we_wordc; ++i) {
 			int index = list_seq_find(locations, (int (*)(const void *, const void *))compare_paths, w[i]);
-			char* matched_path = strdup(w[i]);
-			config_location_map* config_loc = malloc(sizeof(config_location_map));
-			config_loc->name =  basename(matched_path);
+      		char* matched_path = strdup(w[i]);
+			config_loc->name = strdup(basename(matched_path));
 			config_loc->path = matched_path;
 			if (index == -1) {
 				list_add(locations, config_loc);
 				continue;
 			}
+			free_config_location_map(locations->items[index]);
 			locations->items[index] = config_loc; 
 		}
+		
 	}
 
 	wordfree(&p);
@@ -74,6 +80,10 @@ struct cmd_results *cmd_include_one(int argc, char **argv) {
 	for(int i=0; i<locs->length; ++i) {
 		load_include_configs (locs_arr[i]->path, config, &config->swaynag_config_errors);
 	}
-	list_free_items_and_destroy(locs);
+	for (int i = 0; i<locs->length; ++i) {
+		free_config_location_map(locs_arr[i]);
+	}
+	list_free(locs);
+  	free(parent_path);
 	return cmd_results_new(CMD_SUCCESS, NULL);
 }
