@@ -105,6 +105,7 @@ math = cc.find_library('m')
 rt = cc.find_library('rt')
 xcb_icccm = dependency('xcb-icccm', required: get_option('xwayland'))
 threads = dependency('threads') # for pthread_setschedparam
+trawldb = dependency('trawldb-0')
 
 have_xwayland = xcb.found() and xcb_icccm.found() and wlroots_features['xwayland']
 
