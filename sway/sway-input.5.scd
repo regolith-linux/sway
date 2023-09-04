@@ -185,6 +185,9 @@ The following commands may only be used in the configuration file.
 	debug-events*, or as a x11 mouse button (button[1-3,8,9]). If set to
 	_disable_, it disables the scroll_method on_button_down.
 
+*input* <identifier> scroll_button_lock enabled|disabled
+	Enables or disables scroll button lock for specified input device.
+
 *input* <identifier> scroll_factor <floating point value>
 	Changes the scroll factor for the specified input device. Scroll speed will
 	be scaled by the given value, which must be non-negative.
@@ -228,6 +231,8 @@ correct seat.
 	absolute coordinates (with respect to the global coordinate space).
 	Specifying either value as 0 will not update that coordinate.
 
+	Deprecated: use the virtual-pointer Wayland protocol instead.
+
 *seat* <seat> cursor press|release button[1-9]|<event-name-or-code>
 	Simulate pressing (or releasing) the specified mouse button on the
 	specified seat. The button can either be provided as a button event name or
@@ -235,6 +240,8 @@ correct seat.
 	mouse button (button[1-9]). If using button[4-7], which map to axes, an axis
 	event will be simulated, however _press_ and _release_ will be ignored and
 	both will occur.
+
+	Deprecated: use the virtual-pointer Wayland protocol instead.
 
 *seat* <name> fallback true|false
 	Set this seat as the fallback seat. A fallback seat will attach any device
@@ -260,12 +267,6 @@ correct seat.
 	becoming idle, as a space separated list of source names. Valid names are
 	"keyboard", "pointer", "touchpad", "touch", "tablet_pad", "tablet_tool",
 	and "switch". The default behavior is to prevent idle on any event.
-
-*seat* <name> idle_wake <sources...>
-	Sets the set of input event sources which can wake the seat from
-	its idle state, as a space separated list of source names. Valid names are
-	"keyboard", "pointer", "touchpad", "touch", "tablet_pad", "tablet_tool",
-	and "switch". The default behavior is to wake from idle on any event.
 
 *seat* <name> keyboard_grouping none|smart
 	Set how the keyboards in the seat are grouped together. Currently, there

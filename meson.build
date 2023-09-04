@@ -18,6 +18,7 @@ add_project_arguments(
 		'-Wno-unused-parameter',
 		'-Wno-unused-result',
 		'-Wno-missing-braces',
+		'-Wno-format-zero-length',
 		'-Wundef',
 		'-Wvla',
 	],
@@ -44,10 +45,30 @@ subproject(
 	version: wlroots_version,
 )
 wlroots = dependency('wlroots', version: wlroots_version)
+xkbcommon = dependency('xkbcommon')
+cairo = dependency('cairo')
+pango = dependency('pango')
+pangocairo = dependency('pangocairo')
+gdk_pixbuf = dependency('gdk-pixbuf-2.0', required: get_option('gdk-pixbuf'))
+pixman = dependency('pixman-1')
+glesv2 = dependency('glesv2')
+libevdev = dependency('libevdev')
+libinput = dependency('libinput', version: '>=1.6.0')
+xcb = dependency('xcb', required: get_option('xwayland'))
+drm_full = dependency('libdrm') # only needed for drm_fourcc.h
+drm = drm_full.partial_dependency(compile_args: true, includes: true)
+libudev = dependency('libudev')
+bash_comp = dependency('bash-completion', required: false)
+fish_comp = dependency('fish', required: false)
+math = cc.find_library('m')
+rt = cc.find_library('rt')
+xcb_icccm = dependency('xcb-icccm', required: get_option('xwayland'))
+threads = dependency('threads') # for pthread_setschedparam
+trawldb = dependency('trawldb-0')
+
 wlroots_features = {
 	'xwayland': false,
 	'libinput_backend': false,
-	'gles2_renderer': false,
 	'session': false,
 }
 foreach name, _ : wlroots_features
@@ -74,7 +95,6 @@ pango = dependency('pango')
 pangocairo = dependency('pangocairo')
 gdk_pixbuf = dependency('gdk-pixbuf-2.0', required: get_option('gdk-pixbuf'))
 pixman = dependency('pixman-1')
-glesv2 = wlroots_features['gles2_renderer'] ? dependency('glesv2') : null_dep
 libevdev = dependency('libevdev')
 libinput = wlroots_features['libinput_backend'] ? dependency('libinput', version: '>=1.21.0') : null_dep
 xcb = dependency('xcb', required: get_option('xwayland'))
@@ -118,6 +138,11 @@ conf_data.set10('HAVE_LIBSYSTEMD', sdbus.found() and sdbus.name() == 'libsystemd
 conf_data.set10('HAVE_LIBELOGIND', sdbus.found() and sdbus.name() == 'libelogind')
 conf_data.set10('HAVE_BASU', sdbus.found() and sdbus.name() == 'basu')
 conf_data.set10('HAVE_TRAY', have_tray)
+conf_data.set10('HAVE_LIBINPUT_CONFIG_ACCEL_PROFILE_CUSTOM', cc.has_header_symbol(
+	'libinput.h',
+	'LIBINPUT_CONFIG_ACCEL_PROFILE_CUSTOM',
+	dependencies: libinput,
+))
 
 scdoc = dependency('scdoc', version: '>=1.9.2', native: true, required: get_option('man-pages'))
 if scdoc.found()
@@ -243,6 +268,27 @@ configure_file(
 	output: '@BASENAME@',
 	install_dir: join_paths(sysconfdir, 'sway')
 )
+
+install_data(
+	'sway-regolith.desktop',
+	install_dir: join_paths(datadir, 'wayland-sessions')
+)
+
+if get_option('default-wallpaper')
+	wallpaper_files = files(
+		'assets/Sway_Wallpaper_Blue_768x1024.png',
+		'assets/Sway_Wallpaper_Blue_768x1024_Portrait.png',
+		'assets/Sway_Wallpaper_Blue_1136x640.png',
+		'assets/Sway_Wallpaper_Blue_1136x640_Portrait.png',
+		'assets/Sway_Wallpaper_Blue_1366x768.png',
+		'assets/Sway_Wallpaper_Blue_1920x1080.png',
+		'assets/Sway_Wallpaper_Blue_2048x1536.png',
+		'assets/Sway_Wallpaper_Blue_2048x1536_Portrait.png',
+	)
+	wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'sway')
+
+	install_data(wallpaper_files, install_dir: wallpaper_install_dir)
+endif
 
 subdir('completions')
 

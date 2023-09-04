@@ -67,7 +67,13 @@ static void popup_unconstrain(struct sway_xdg_popup *popup) {
 	struct sway_view *view = popup->child.view;
 	struct wlr_xdg_popup *wlr_popup = popup->wlr_xdg_popup;
 
-	struct sway_output *output = view->container->pending.workspace->output;
+	struct sway_workspace *workspace = view->container->pending.workspace;
+	if (!workspace) {
+		// is null if in the scratchpad
+		return;
+	}
+
+	struct sway_output *output = workspace->output;
 
 	// the output box expressed in the coordinate system of the toplevel parent
 	// of the popup
@@ -98,8 +104,8 @@ static struct sway_xdg_popup *popup_create(
 	wl_signal_add(&xdg_surface->events.destroy, &popup->destroy);
 	popup->destroy.notify = popup_handle_destroy;
 
-	wl_signal_add(&xdg_surface->events.map, &popup->child.surface_map);
-	wl_signal_add(&xdg_surface->events.unmap, &popup->child.surface_unmap);
+	wl_signal_add(&xdg_surface->surface->events.map, &popup->child.surface_map);
+	wl_signal_add(&xdg_surface->surface->events.unmap, &popup->child.surface_unmap);
 
 	popup_unconstrain(popup);
 
@@ -288,6 +294,8 @@ static void handle_commit(struct wl_listener *listener, void *data) {
 		memcpy(&view->geometry, &new_geo, sizeof(struct wlr_box));
 		if (container_is_floating(view->container)) {
 			view_update_size(view);
+			wlr_xdg_toplevel_set_size(view->wlr_xdg_toplevel, view->geometry.width,
+				view->geometry.height);
 			transaction_commit_dirty_client();
 		} else {
 			view_center_surface(view);
@@ -338,7 +346,7 @@ static void handle_request_fullscreen(struct wl_listener *listener, void *data) 
 	struct wlr_xdg_toplevel *toplevel = xdg_shell_view->view.wlr_xdg_toplevel;
 	struct sway_view *view = &xdg_shell_view->view;
 
-	if (!toplevel->base->mapped) {
+	if (!toplevel->base->surface->mapped) {
 		return;
 	}
 
@@ -523,10 +531,10 @@ void handle_xdg_shell_surface(struct wl_listener *listener, void *data) {
 	xdg_shell_view->view.wlr_xdg_toplevel = xdg_surface->toplevel;
 
 	xdg_shell_view->map.notify = handle_map;
-	wl_signal_add(&xdg_surface->events.map, &xdg_shell_view->map);
+	wl_signal_add(&xdg_surface->surface->events.map, &xdg_shell_view->map);
 
 	xdg_shell_view->unmap.notify = handle_unmap;
-	wl_signal_add(&xdg_surface->events.unmap, &xdg_shell_view->unmap);
+	wl_signal_add(&xdg_surface->surface->events.unmap, &xdg_shell_view->unmap);
 
 	xdg_shell_view->destroy.notify = handle_destroy;
 	wl_signal_add(&xdg_surface->events.destroy, &xdg_shell_view->destroy);

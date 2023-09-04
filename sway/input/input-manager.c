@@ -80,15 +80,7 @@ char *input_device_get_identifier(struct wlr_input_device *device) {
 		}
 	}
 
-	const char *fmt = "%d:%d:%s";
-	int len = snprintf(NULL, 0, fmt, vendor, product, name) + 1;
-	char *identifier = malloc(len);
-	if (!identifier) {
-		sway_log(SWAY_ERROR, "Unable to allocate unique input device name");
-		return NULL;
-	}
-
-	snprintf(identifier, len, fmt, vendor, product, name);
+	char *identifier = format_str("%d:%d:%s", vendor, product, name);
 	free(name);
 	return identifier;
 }
@@ -503,6 +495,8 @@ struct sway_input_manager *input_manager_create(struct sway_server *server) {
 	wl_signal_add(&input->keyboard_shortcuts_inhibit->events.new_inhibitor,
 			&input->keyboard_shortcuts_inhibit_new_inhibitor);
 
+	input->pointer_gestures = wlr_pointer_gestures_v1_create(server->wl_display);
+
 	return input;
 }
 
@@ -531,6 +525,18 @@ void input_manager_set_focus(struct sway_node *node) {
 static void retranslate_keysyms(struct input_config *input_config) {
 	for (int i = 0; i < config->input_configs->length; ++i) {
 		struct input_config *ic = config->input_configs->items[i];
+		if (ic->xkb_layout || ic->xkb_file) {
+			// this is the first config with xkb_layout or xkb_file
+			if (ic->identifier == input_config->identifier) {
+				translate_keysyms(ic);
+			}
+
+			return;
+		}
+	}
+
+	for (int i = 0; i < config->input_type_configs->length; ++i) {
+		struct input_config *ic = config->input_type_configs->items[i];
 		if (ic->xkb_layout || ic->xkb_file) {
 			// this is the first config with xkb_layout or xkb_file
 			if (ic->identifier == input_config->identifier) {

@@ -11,6 +11,7 @@
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_content_type_v1.h>
+#include <wlr/types/wlr_cursor_shape_v1.h>
 #include <wlr/types/wlr_data_control_v1.h>
 #include <wlr/types/wlr_drm.h>
 #include <wlr/types/wlr_export_dmabuf_v1.h>
@@ -44,9 +45,11 @@
 #include "sway/input/input-manager.h"
 #include "sway/output.h"
 #include "sway/server.h"
+#include "sway/input/cursor.h"
 #include "sway/tree/root.h"
 
 #if HAVE_XWAYLAND
+#include <wlr/xwayland/shell.h>
 #include "sway/xwayland.h"
 #endif
 
@@ -55,7 +58,7 @@
 #endif
 
 #define SWAY_XDG_SHELL_VERSION 2
-#define SWAY_LAYER_SHELL_VERSION 3
+#define SWAY_LAYER_SHELL_VERSION 4
 
 #if WLR_HAS_DRM_BACKEND
 static void handle_drm_lease_request(struct wl_listener *listener, void *data) {
@@ -71,10 +74,24 @@ static void handle_drm_lease_request(struct wl_listener *listener, void *data) {
 }
 #endif
 
+static bool filter_global(const struct wl_client *client,
+		const struct wl_global *global, void *data) {
+#if HAVE_XWAYLAND
+	struct wlr_xwayland *xwayland = server.xwayland.wlr_xwayland;
+	if (global == xwayland->shell_v1->global) {
+		return xwayland->server != NULL && client == xwayland->server->client;
+	}
+#endif
+
+	return true;
+}
+
 bool server_init(struct sway_server *server) {
 	sway_log(SWAY_DEBUG, "Initializing Wayland server");
 	server->wl_display = wl_display_create();
 	server->wl_event_loop = wl_display_get_event_loop(server->wl_display);
+
+	wl_display_set_global_filter(server->wl_display, filter_global, NULL);
 
 	server->backend = wlr_backend_autocreate(server->wl_display, &server->session);
 	if (!server->backend) {
@@ -103,7 +120,7 @@ bool server_init(struct sway_server *server) {
 		return false;
 	}
 
-	server->compositor = wlr_compositor_create(server->wl_display,
+	server->compositor = wlr_compositor_create(server->wl_display, 6,
 		server->renderer);
 	server->compositor_new_surface.notify = handle_compositor_new_surface;
 	wl_signal_add(&server->compositor->events.new_surface,
@@ -114,7 +131,11 @@ bool server_init(struct sway_server *server) {
 	server->data_device_manager =
 		wlr_data_device_manager_create(server->wl_display);
 
-	wlr_gamma_control_manager_v1_create(server->wl_display);
+	server->gamma_control_manager_v1 =
+		wlr_gamma_control_manager_v1_create(server->wl_display);
+	server->gamma_control_set_gamma.notify = handle_gamma_control_set_gamma;
+	wl_signal_add(&server->gamma_control_manager_v1->events.set_gamma,
+		&server->gamma_control_set_gamma);
 
 	server->new_output.notify = handle_new_output;
 	wl_signal_add(&server->backend->events.new_output, &server->new_output);
@@ -126,8 +147,7 @@ bool server_init(struct sway_server *server) {
 
 	server->idle = wlr_idle_create(server->wl_display);
 	server->idle_notifier_v1 = wlr_idle_notifier_v1_create(server->wl_display);
-	server->idle_inhibit_manager_v1 =
-		sway_idle_inhibit_manager_v1_create(server->wl_display, server->idle);
+	sway_idle_inhibit_manager_v1_init();
 
 	server->layer_shell = wlr_layer_shell_v1_create(server->wl_display,
 		SWAY_LAYER_SHELL_VERSION);
@@ -231,6 +251,11 @@ bool server_init(struct sway_server *server) {
 		xdg_activation_v1_handle_new_token;
 	wl_signal_add(&server->xdg_activation_v1->events.new_token,
 		&server->xdg_activation_v1_new_token);
+
+	struct wlr_cursor_shape_manager_v1 *cursor_shape_manager =
+		wlr_cursor_shape_manager_v1_create(server->wl_display, 1);
+	server->request_set_cursor_shape.notify = handle_request_set_cursor_shape;
+	wl_signal_add(&cursor_shape_manager->events.request_set_shape, &server->request_set_cursor_shape);
 
 	wl_list_init(&server->pending_launcher_ctxs);
 
