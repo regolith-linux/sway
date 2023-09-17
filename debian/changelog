@@ -1,3 +1,64 @@
+sway-regolith (1.8.1-2) unstable; urgency=medium
+
+  * Upload to unstable (Closes: #1038794)
+  * Backport libinput fix from
+    https://github.com/swaywm/sway/commit/dee032d0a0ecd958c902b88302dc59703d703c7f
+    to make sway build with the newest libinput release
+
+ -- Birger Schacht <birger@debian.org>  Sun, 23 Jul 2023 17:25:27 +0200
+
+sway-regolith (1.8.1-1) experimental; urgency=medium
+
+  * New upstream version
+  * Bump version of libinput dependency (Closes: #1029382)
+  * Bump standards-version (no changes required)
+  * Replace obsolete build-dependency libgdk-pixbuf2.0-dev with
+    libgdk-pixbuf-2.0-dev
+  * Bump year and fix email address in d/copyright
+
+ -- Birger Schacht <birger@debian.org>  Mon, 30 Jan 2023 19:06:06 +0100
+
+sway-regolith (1.8-1) experimental; urgency=medium
+
+  * New upstream version
+
+ -- Birger Schacht <birger@debian.org>  Sun, 25 Dec 2022 17:13:17 +0100
+
+sway-regolith (1.8~rc4-1) experimental; urgency=medium
+
+  * New upstream version
+
+ -- Birger Schacht <birger@debian.org>  Mon, 19 Dec 2022 16:35:46 +0100
+
+sway-regolith (1.8~rc3-1) experimental; urgency=medium
+
+  * New upstream version
+
+ -- Birger Schacht <birger@debian.org>  Mon, 12 Dec 2022 14:51:40 +0100
+
+sway-regolith (1.8~rc2-1) experimental; urgency=medium
+
+  * New upstream version
+
+ -- Birger Schacht <birger@debian.org>  Sat, 03 Dec 2022 20:24:01 +0100
+
+sway-regolith (1.8~rc1-1) experimental; urgency=medium
+
+  * New upstream version
+  * Drop backported patches
+  * d/control: bump wlroots build-dependency version
+
+  [ Fabian Grünbichler ]
+  * d/control: correct version meson
+
+  [ Debian Janitor ]
+  * Use secure URI in Homepage field.
+  * Set field Upstream-Name in debian/copyright.
+  * Remove obsolete field Name from debian/upstream/metadata (already present in
+    machine-readable debian/copyright).
+
+ -- Birger Schacht <birger@debian.org>  Mon, 28 Nov 2022 11:27:06 +0100
+
 sway-regolith (1.7-5) focal; urgency=medium
 
   * Updated control to provide sway

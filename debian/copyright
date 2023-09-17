@@ -1,5 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: https://github.com/swaywm/sway
+Upstream-Name: sway-regolith
 
 Files: *
 Copyright: © 2016-2018 Drew DeVault <sir@cmpwn.com>
@@ -23,7 +24,7 @@ License: Expat
 
 Files: debian/*
 Copyright: © 2018 Nicolas Braud-Santoni <nicolas@braud-santoni.eu>
-           © 2018-2022 Birger Schacht <birger@rantanplan.org>
+           © 2018-2023 Birger Schacht <birger@debian.org>
 License: Expat
 
 License: LGPL-2.1+
