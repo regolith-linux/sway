@@ -239,7 +239,7 @@ endif
 
 executable(
 	'sway-regolith',
-	sway_sources,
+	sway_sources + wl_protos_src,
 	include_directories: [sway_inc],
 	dependencies: sway_deps,
 	link_with: [lib_sway_common],
