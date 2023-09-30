@@ -1,0 +1,48 @@
+Index: sway-regolith/meson.build
+===================================================================
+--- sway-regolith.orig/meson.build
++++ sway-regolith/meson.build
+@@ -164,18 +164,18 @@ endif
+ add_project_arguments('-DSYSCONFDIR="/@0@"'.format(join_paths(prefix, sysconfdir)), language : 'c')
+ 
+ version = '"@0@"'.format(meson.project_version())
+-git = find_program('git', native: true, required: false)
+-if git.found()
+-	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check: false)
+-	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check: false)
+-	if git_commit.returncode() == 0 and git_branch.returncode() == 0
+-		version = '"@0@-@1@ (" __DATE__ ", branch \'@2@\')"'.format(
+-			meson.project_version(),
+-			git_commit.stdout().strip(),
+-			git_branch.stdout().strip(),
+-		)
+-	endif
+-endif
++# git = find_program('git', native: true, required: false)
++# if git.found()
++# 	git_commit = run_command([git, 'rev-parse', '--short', 'HEAD'], check: false)
++# 	git_branch = run_command([git, 'rev-parse', '--abbrev-ref', 'HEAD'], check: false)
++#	if git_commit.returncode() == 0 and git_branch.returncode() == 0
++# 		version = '"@0@-@1@ (" __DATE__ ", branch \'@2@\')"'.format(
++# 			meson.project_version(),
++# 			git_commit.stdout().strip(),
++# 			git_branch.stdout().strip(),
++# 		)
++# 	endif
++# endif
+ add_project_arguments('-DSWAY_VERSION=@0@'.format(version), language: 'c')
+ 
+ # Compute the relative path used by compiler invocations.
+Index: sway-regolith/swaybar/tray/dbusmenu.c
+===================================================================
+--- sway-regolith.orig/swaybar/tray/dbusmenu.c
++++ sway-regolith/swaybar/tray/dbusmenu.c
+@@ -592,7 +592,7 @@ static void swaybar_dbusmenu_draw_menu(s
+ 		cairo_surface_destroy(recorder);
+ 		return;
+ 	}
+-	int surface_x, surface_y, surface_width, surface_height;
++	int surface_x = 0, surface_y = 0, surface_width = 0, surface_height = 0;
+ 	draw_menu_items(cairo, menu, &surface_x, &surface_y, &surface_width,
+ 					&surface_height, open);
+ 
