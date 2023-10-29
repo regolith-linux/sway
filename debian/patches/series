@@ -1,4 +1,4 @@
-no-wallpaper.diff
 0001-Install-zsh-completions-into-the-correct-directory.patch
 0002-backport-libinput-fix.patch
 0003-regolith-build-fix-manic.patch
+0004-no-wallpaper.diff
