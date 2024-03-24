@@ -1,3 +1,16 @@
+sway-regolith (1.9-2) noble; urgency=medium
+
+  [ Regolith Linux ]
+  * chore: add patch for regolith customizations of sway
+  * chore: add patch for version issue
+  * chore: cleanup debian packaging
+  * chore: avoid shipping upstream wallpaper
+
+  [ Soumya Ranjan Patnaik ]
+  * chore: add patch to enable tray dbus menus
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Sun, 24 Mar 2024 14:06:12 -0700
+
 sway-regolith (1.9-1) noble; urgency=medium
 
   [ Regolith Linux ]
