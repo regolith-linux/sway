@@ -1,0 +1,23 @@
+diff --git a/meson.build b/meson.build
+index c52d6629..2e09c9c5 100644
+--- a/meson.build
++++ b/meson.build
+@@ -240,18 +240,6 @@ config.set('datadir', join_paths(prefix, datadir))
+ config.set('prefix', prefix)
+ config.set('sysconfdir', join_paths(prefix, sysconfdir))
+ 
+-configure_file(
+-	configuration: config,
+-	input: 'config.in',
+-	output: '@BASENAME@',
+-	install_dir: join_paths(sysconfdir, 'sway')
+-)
+-
+-install_data(
+-	'sway.desktop',
+-	install_dir: join_paths(datadir, 'wayland-sessions')
+-)
+-
+ if get_option('default-wallpaper')
+ 	wallpaper_files = files(
+ 		'assets/Sway_Wallpaper_Blue_768x1024.png',
