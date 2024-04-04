@@ -1,8 +1,8 @@
-diff --git a/meson.build b/meson.build
-index c52d6629..2e09c9c5 100644
---- a/meson.build
-+++ b/meson.build
-@@ -240,18 +240,6 @@ config.set('datadir', join_paths(prefix, datadir))
+Index: sway-regolith/meson.build
+===================================================================
+--- sway-regolith.orig/meson.build
++++ sway-regolith/meson.build
+@@ -249,18 +249,6 @@ config.set('datadir', join_paths(prefix,
  config.set('prefix', prefix)
  config.set('sysconfdir', join_paths(prefix, sysconfdir))
  
@@ -14,7 +14,7 @@ index c52d6629..2e09c9c5 100644
 -)
 -
 -install_data(
--	'sway.desktop',
+-	'sway-regolith.desktop',
 -	install_dir: join_paths(datadir, 'wayland-sessions')
 -)
 -
