@@ -1,3 +1,16 @@
+sway-regolith (1.9-3) noble; urgency=medium
+
+  [ Regolith Linux ]
+  * fix: add missing src/header for dbusmenu from 1.8 version. manually correct warning of uninitialized variable found in testing
+
+  [ Soumya Ranjan Patnaik ]
+  * chore: add patch to disable install for sway config and session files
+
+  [ Regolith Linux ]
+  * fix: manually reapply last patch due to 'fuzz' and add to series
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Wed, 03 Apr 2024 18:50:53 -0700
+
 sway-regolith (1.9-2) noble; urgency=medium
 
   [ Regolith Linux ]
