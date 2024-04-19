@@ -1,3 +1,10 @@
+sway-regolith (1.9-4) noble; urgency=medium
+
+  * chore: ignore debian tmp dir
+  * fix: declare conflicts with sway to avoid package installation error.  Addresses https://github.com/regolith-linux/sway-regolith/issues/18.
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Fri, 19 Apr 2024 07:47:51 -0700
+
 sway-regolith (1.9-3) noble; urgency=medium
 
   [ Regolith Linux ]
