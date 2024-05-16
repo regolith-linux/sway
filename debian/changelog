@@ -1,3 +1,11 @@
+sway-regolith (1.9-5) noble; urgency=medium
+
+  [ Soumya Ranjan Patnaik ]
+  * chore: cleanup unrequired deps from the sway-regolith package (#22)
+  * fix: use Provides for sway instead of Conflicts (#21)
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Thu, 16 May 2024 07:32:49 -0700
+
 sway-regolith (1.9-4) noble; urgency=medium
 
   * chore: ignore debian tmp dir
