@@ -1,3 +1,9 @@
+sway-regolith (1.9-6) noble; urgency=medium
+
+  * fix: isolate files shared with upstream in supplemental package
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Sat, 18 May 2024 08:47:20 -0700
+
 sway-regolith (1.9-5) noble; urgency=medium
 
   [ Soumya Ranjan Patnaik ]
