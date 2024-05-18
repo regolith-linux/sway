@@ -1,4 +1,4 @@
-sway-regolith (1.9-6) noble; urgency=medium
+sway-regolith (1.9-7) noble; urgency=medium
 
   * fix: isolate files shared with upstream in supplemental package
 

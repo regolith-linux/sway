@@ -36,7 +36,7 @@ Depends:
     swaybg,
     polkitd,
     libtrawldb,
-    sway (>= 1.9) | sway-regolith-supplemental,
+    sway-regolith-supplemental | sway (>= 1.9),
     ${misc:Depends},
     ${shlibs:Depends}
 Suggests: xdg-desktop-portal-wlr
@@ -49,6 +49,7 @@ Description: i3-compatible Wayland compositor for the Regolith desktop environme
 
 Package: sway-regolith-supplemental
 Architecture: any
+Priority: standard
 Depends: libgl1-mesa-dri, ${misc:Depends}, ${shlibs:Depends}
 Provides: sway
 Conflicts: sway
