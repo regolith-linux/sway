@@ -49,7 +49,6 @@ Description: i3-compatible Wayland compositor for the Regolith desktop environme
 
 Package: sway-regolith-supplemental
 Architecture: any
-Priority: standard
 Depends: libgl1-mesa-dri, ${misc:Depends}, ${shlibs:Depends}
 Provides: sway
 Conflicts: sway
