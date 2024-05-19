@@ -39,7 +39,7 @@ Depends:
     sway-regolith-supplemental | sway (>= 1.9),
     ${misc:Depends},
     ${shlibs:Depends}
-Suggests: xdg-desktop-portal-wlr, sway-regolith-supplemental
+Suggests: xdg-desktop-portal-wlr
 Description: i3-compatible Wayland compositor for the Regolith desktop environment
  sway (SirCmpwn's Wayland compositor) is a tiling Wayland compositor and a
  drop-in replacement for the i3 window manager for X11. It works with your
@@ -49,24 +49,19 @@ Description: i3-compatible Wayland compositor for the Regolith desktop environme
 
 Package: sway-regolith-supplemental
 Architecture: any
-Priority: standard
 Depends: libgl1-mesa-dri, ${misc:Depends}, ${shlibs:Depends}
-Provides: sway
 Conflicts: sway
-Replaces: sway
 Description: Support files that may also come from upstream package
  These files are required for sway to function but may be provided by upstream.
 
 Package: sway-regolith-standalone
 Architecture: any
-Priority: standard
 Depends: sway-regolith, sway-regolith-supplemental, ${misc:Depends}, ${shlibs:Depends}
 Description: Meta package for Regolith's Sway variant.
  This meta package is for systems that do not use baseline Sway.
 
 Package: sway-regolith-hybrid
 Architecture: any
-Priority: standard
 Depends: sway-regolith, sway, ${misc:Depends}, ${shlibs:Depends}
 Description: Meta package for Regolith's Sway variant.
  This meta package is for systems that also have baseline Sway installed.
