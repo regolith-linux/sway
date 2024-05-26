@@ -1,9 +1,7 @@
 Source: sway-regolith
 Section: x11
 Priority: optional
-Maintainer: Sway and related packages team <team+swaywm@tracker.debian.org>
-Uploaders: Birger Schacht <birger@debian.org>,
-           nicoo <nicoo@debian.org>
+Maintainer: Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>, Regolith Desktop <regolith.desktop@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                libcairo2-dev,
                libcap-dev,
@@ -29,14 +27,16 @@ Build-Depends: debhelper-compat (= 13),
                tree,
                wayland-protocols (>= 1.24)
 Standards-Version: 4.6.1.0
-Homepage: http://swaywm.org
-Vcs-Browser: https://salsa.debian.org/swaywm-team/sway
-Vcs-Git: https://salsa.debian.org/swaywm-team/sway.git
 Rules-Requires-Root: no
 
 Package: sway-regolith
 Architecture: any
-Depends: libgl1-mesa-dri, swaybg, policykit-1, libtrawldb, ${misc:Depends}, ${shlibs:Depends}
+Depends: libgl1-mesa-dri,
+         libtrawldb,
+         polkitd,
+         swaybg,
+         ${misc:Depends},
+         ${shlibs:Depends}
 Suggests: xdg-desktop-portal-wlr
 Provides: sway
 Description: i3-compatible Wayland compositor for the Regolith desktop environment
