@@ -1,3 +1,9 @@
+sway-regolith (1.9-16) noble; urgency=medium
+
+  * fix: remove desktop session file
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Mon, 27 May 2024 09:48:43 -0700
+
 sway-regolith (1.9-15) noble; urgency=medium
 
   * chore: update patches to use upstream bin name
