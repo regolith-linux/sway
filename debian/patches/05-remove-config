@@ -2,10 +2,15 @@ Index: sway-regolith/meson.build
 ===================================================================
 --- sway-regolith.orig/meson.build
 +++ sway-regolith/meson.build
-@@ -249,18 +249,6 @@ config.set('datadir', join_paths(prefix,
- config.set('prefix', prefix)
- config.set('sysconfdir', join_paths(prefix, sysconfdir))
+@@ -244,23 +244,6 @@ if get_option('swaynag')
+ 	subdir('swaynag')
+ endif
  
+-config = configuration_data()
+-config.set('datadir', join_paths(prefix, datadir))
+-config.set('prefix', prefix)
+-config.set('sysconfdir', join_paths(prefix, sysconfdir))
+-
 -configure_file(
 -	configuration: config,
 -	input: 'config.in',
@@ -14,7 +19,7 @@ Index: sway-regolith/meson.build
 -)
 -
 -install_data(
--	'sway-regolith.desktop',
+-	'sway.desktop',
 -	install_dir: join_paths(datadir, 'wayland-sessions')
 -)
 -

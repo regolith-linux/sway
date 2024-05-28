@@ -2,4 +2,4 @@
 02-version-fix.patch
 03-disable-wallpaper
 04-dbus-tray
-05-disable-config-files
+05-remove-config

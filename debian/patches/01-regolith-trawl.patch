@@ -49,25 +49,6 @@ Index: sway-regolith/meson.build
  wlroots_features = {
  	'xwayland': false,
  	'libinput_backend': false,
-@@ -248,7 +269,7 @@ configure_file(
- )
- 
- install_data(
--	'sway.desktop',
-+	'sway-regolith.desktop',
- 	install_dir: join_paths(datadir, 'wayland-sessions')
- )
- 
-Index: sway-regolith/sway-regolith.desktop
-===================================================================
---- /dev/null
-+++ sway-regolith/sway-regolith.desktop
-@@ -0,0 +1,5 @@
-+[Desktop Entry]
-+Name=Sway Regolith
-+Comment=A sway variant with support for trawl resource manager
-+Exec=sway
-+Type=Application
 Index: sway-regolith/sway/commands.c
 ===================================================================
 --- sway-regolith.orig/sway/commands.c
@@ -189,12 +170,3 @@ Index: sway-regolith/sway/meson.build
  ]
  
  if have_xwayland
-@@ -241,7 +243,7 @@ if wlroots_features['libinput_backend']
- endif
- 
- executable(
--	'sway',
-+	'sway-regolith',
- 	sway_sources + wl_protos_src,
- 	include_directories: [sway_inc],
- 	dependencies: sway_deps,
