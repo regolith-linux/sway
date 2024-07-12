@@ -1,5 +1,5 @@
 project(
-	'sway-regolith',
+	'sway',
 	'c',
 	version: '1.7',
 	license: 'MIT',
