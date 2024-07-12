@@ -1,3 +1,9 @@
+sway-regolith (1.7-7) jammy; urgency=medium
+
+  * fix: rename exec back to sway for consistency w/ newer versions
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Thu, 11 Jul 2024 17:55:43 -0700
+
 sway-regolith (1.7-6) focal; urgency=medium
 
   [ Soumya Ranjan Patnaik ]
