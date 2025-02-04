@@ -1,3 +1,9 @@
+sway-regolith (1.7-8) jammy; urgency=medium
+
+  * UNRELEASED
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Tue, 04 Feb 2025 14:18:35 +0000
+
 sway-regolith (1.7-7) jammy; urgency=medium
 
   * fix: rename exec back to sway for consistency w/ newer versions
