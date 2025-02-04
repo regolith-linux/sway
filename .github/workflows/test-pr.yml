@@ -41,7 +41,7 @@ jobs:
           gpg-key: "${{ secrets.PACKAGE_PRIVATE_KEY2 }}"
 
       - name: Build Package
-        uses: regolith-linux/actions/build-package@main
+        uses: regolith-linux/actions/build-package@catch-errors
         with:
           name: "${{ github.event.repository.name }}"
           distro: "${{ matrix.distro }}"
