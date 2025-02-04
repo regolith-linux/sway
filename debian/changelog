@@ -1,3 +1,9 @@
+sway-regolith (1.9-17) noble; urgency=medium
+
+  * UNRELEASED
+
+ -- Regolith Linux <regolith.linux@gmail.com>  Tue, 04 Feb 2025 14:18:28 +0000
+
 sway-regolith (1.9-16) noble; urgency=medium
 
   * fix: remove desktop session file
