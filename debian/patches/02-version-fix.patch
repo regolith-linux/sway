@@ -1,0 +1,19 @@
+Index: sway-regolith/meson.build
+===================================================================
+--- sway-regolith.orig/meson.build
++++ sway-regolith/meson.build
+@@ -1,5 +1,5 @@
+ project(
+-	'sway-regolith',
++	'sway',
+ 	'c',
+ 	version: '1.10.1',
+ 	license: 'MIT',
+@@ -80,7 +80,6 @@ math = cc.find_library('m')
+ rt = cc.find_library('rt')
+ xcb_icccm = wlroots_features['xwayland'] ? dependency('xcb-icccm') : null_dep
+ threads = dependency('threads') # for pthread_setschedparam
+-trawldb = dependency('trawldb-0')
+ 
+ if get_option('sd-bus-provider') == 'auto'
+ 	if not get_option('tray').disabled()
