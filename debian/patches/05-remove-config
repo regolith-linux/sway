@@ -1,0 +1,28 @@
+Index: sway-regolith/meson.build
+===================================================================
+--- sway-regolith.orig/meson.build
++++ sway-regolith/meson.build
+@@ -244,23 +244,6 @@ if get_option('swaynag')
+ 	subdir('swaynag')
+ endif
+ 
+-config = configuration_data()
+-config.set('datadir', join_paths(prefix, datadir))
+-config.set('prefix', prefix)
+-config.set('sysconfdir', join_paths(prefix, sysconfdir))
+-
+-configure_file(
+-	configuration: config,
+-	input: 'config.in',
+-	output: '@BASENAME@',
+-	install_dir: join_paths(sysconfdir, 'sway')
+-)
+-
+-install_data(
+-	'sway.desktop',
+-	install_dir: join_paths(datadir, 'wayland-sessions')
+-)
+-
+ if get_option('default-wallpaper')
+ 	wallpaper_files = files(
+ 		'assets/Sway_Wallpaper_Blue_768x1024.png',
