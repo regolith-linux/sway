@@ -376,7 +376,7 @@ Index: sway-regolith/swaybar/tray/dbusmenu.c
 ===================================================================
 --- /dev/null
 +++ sway-regolith/swaybar/tray/dbusmenu.c
-@@ -0,0 +1,1367 @@
+@@ -0,0 +1,1348 @@
 +#define _POSIX_C_SOURCE 200809L
 +#include <linux/input-event-codes.h>
 +#include <pool-buffer.h>
@@ -388,7 +388,6 @@ Index: sway-regolith/swaybar/tray/dbusmenu.c
 +#include <xdg-shell-client-protocol.h>
 +#include <xdg-shell-protocol.h>
 +
-+#include "background-image.h"
 +#include "cairo.h"
 +#include "cairo_util.h"
 +#include "list.h"
@@ -788,25 +787,7 @@ Index: sway-regolith/swaybar/tray/dbusmenu.c
 +				if (sni->icon_theme_path) {
 +					list_add(icon_search_paths, sni->icon_theme_path);
 +				}
-+				int min_size, max_size;
-+				char *icon_path =
-+				find_icon(tray->themes, icon_search_paths, item->icon_name, size,
-+						config->icon_theme, &min_size, &max_size);
 +				list_free(icon_search_paths);
-+
-+				if (icon_path) {
-+					cairo_surface_t *icon = load_background_image(icon_path);
-+					free(icon_path);
-+					cairo_surface_t *icon_scaled =
-+					cairo_image_surface_scale(icon, size, size);
-+					cairo_surface_destroy(icon);
-+
-+					cairo_set_source_surface(cairo, icon_scaled, x, y);
-+					cairo_rectangle(cairo, x, y, size, size);
-+					cairo_fill(cairo);
-+					cairo_surface_destroy(icon_scaled);
-+					is_icon_drawn = true;
-+				}
 +			} else if (item->icon_data) {
 +				cairo_surface_t *icon = cairo_image_surface_scale(item->icon_data, size, size);
 +				cairo_set_source_surface(cairo, icon, x, y);
