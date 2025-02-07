@@ -1,7 +1,7 @@
 Source: sway-regolith
 Section: x11
 Priority: optional
-Maintainer: Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>, Regolith Desktop <regolith.desktop@gmail.com>
+Maintainer: Soumya Ranjan Patnaik <soumyaranjan1812@gmail.com>
 Build-Depends: debhelper-compat (= 13),
                libcairo2-dev,
                libcap-dev,
@@ -19,7 +19,7 @@ Build-Depends: debhelper-compat (= 13),
                libtrawldb,
                libwayland-dev (>= 1.20.0),
                libwayland-egl1,
-               libwlroots-dev (>= 0.15.0),
+               libwlroots-0.18-dev,
                libxkbcommon-dev,
                meson (>=0.48),
                pkgconf,
