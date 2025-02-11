@@ -69,3 +69,84 @@ Index: sway-regolith/sway/commands/set_from_resource.c
 +  free(resource_value);
 +  return cmd_set(2, argv_new);
 +}
+Index: sway-regolith/include/sway/commands.h
+===================================================================
+--- sway-regolith.orig/include/sway/commands.h
++++ sway-regolith/include/sway/commands.h
+@@ -173,6 +173,7 @@ sway_cmd cmd_resize;
+ sway_cmd cmd_scratchpad;
+ sway_cmd cmd_seamless_mouse;
+ sway_cmd cmd_set;
++sway_cmd cmd_set_from_resource;
+ sway_cmd cmd_shortcuts_inhibitor;
+ sway_cmd cmd_show_marks;
+ sway_cmd cmd_smart_borders;
+Index: sway-regolith/sway/commands.c
+===================================================================
+--- sway-regolith.orig/sway/commands.c
++++ sway-regolith/sway/commands.c
+@@ -83,6 +83,7 @@ static const struct cmd_handler handlers
+ 	{ "popup_during_fullscreen", cmd_popup_during_fullscreen },
+ 	{ "seat", cmd_seat },
+ 	{ "set", cmd_set },
++	{ "set_from_resource", cmd_set_from_resource },
+ 	{ "show_marks", cmd_show_marks },
+ 	{ "smart_borders", cmd_smart_borders },
+ 	{ "smart_gaps", cmd_smart_gaps },
+@@ -279,8 +280,8 @@ list_t *execute_command(char *_exec, str
+ 			goto cleanup;
+ 		}
+ 
+-		// Var replacement, for all but first argument of set
+-		for (int i = handler->handle == cmd_set ? 2 : 1; i < argc; ++i) {
++		// Var replacement, for all but first argument of set and xresource
++		for (int i = handler->handle == cmd_set || handler->handle == cmd_set_from_resource ? 2 : 1; i < argc; ++i) {
+ 			argv[i] = do_var_replacement(argv[i]);
+ 		}
+ 
+@@ -392,7 +393,7 @@ struct cmd_results *config_command(char
+ 	}
+ 
+ 	// Do variable replacement
+-	if (handler->handle == cmd_set && argc > 1 && *argv[1] == '$') {
++	if ((handler->handle == cmd_set || handler->handle == cmd_set_from_resource )&& argc > 1 && *argv[1] == '$') {
+ 		// Escape the variable name so it does not get replaced by one shorter
+ 		char *temp = calloc(1, strlen(argv[1]) + 2);
+ 		temp[0] = '$';
+@@ -407,7 +408,7 @@ struct cmd_results *config_command(char
+ 	free(command);
+ 
+ 	// Strip quotes and unescape the string
+-	for (int i = handler->handle == cmd_set ? 2 : 1; i < argc; ++i) {
++	for (int i = handler->handle == cmd_set || handler->handle == cmd_set_from_resource ? 2 : 1; i < argc; ++i) {
+ 		if (handler->handle != cmd_exec && handler->handle != cmd_exec_always
+ 				&& handler->handle != cmd_mode
+ 				&& handler->handle != cmd_bindsym
+@@ -415,6 +416,7 @@ struct cmd_results *config_command(char
+ 				&& handler->handle != cmd_bindswitch
+ 				&& handler->handle != cmd_bindgesture
+ 				&& handler->handle != cmd_set
++				&& handler->handle != cmd_set_from_resource
+ 				&& handler->handle != cmd_for_window
+ 				&& (*argv[i] == '\"' || *argv[i] == '\'')) {
+ 			strip_quotes(argv[i]);
+Index: sway-regolith/sway/meson.build
+===================================================================
+--- sway-regolith.orig/sway/meson.build
++++ sway-regolith/sway/meson.build
+@@ -103,6 +103,7 @@ sway_sources = files(
+ 	'commands/seat/shortcuts_inhibitor.c',
+ 	'commands/seat/xcursor_theme.c',
+ 	'commands/set.c',
++	'commands/set_from_resource.c',
+ 	'commands/show_marks.c',
+ 	'commands/shortcuts_inhibitor.c',
+ 	'commands/smart_borders.c',
+@@ -234,6 +235,7 @@ sway_deps = [
+ 	xkbcommon,
+ 	xcb,
+ 	xcb_icccm,
++	trawldb,
+ ]
+ 
+ if wlroots_features['xwayland']
